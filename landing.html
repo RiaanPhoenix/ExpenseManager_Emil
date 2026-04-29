@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Persónulegar fjármálagreiningar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0F1B2D;
+      --navy-mid: #1A2D45;
+      --blue: #2B7FFF;
+      --teal: #0EA5B0;
+      --white: #FFFFFF;
+      --bg: #F5F7FA;
+      --border: #E2E8F0;
+      --text: #0F1B2D;
+      --text-muted: #64748B;
+      --green: #10B981;
+      --amber: #F59E0B;
+    }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--white); }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5vw;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 800; color: white; letter-spacing: -0.05em;
+    }
+    .nav-logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: var(--text-muted); transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-ctas { display: flex; gap: 10px; align-items: center; }
+    .nav-ctas a { font-size: 13px; font-weight: 600; }
+    .btn-outline {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-solid {
+      background: var(--blue);
+      color: white;
+      border-radius: 8px;
+      padding: 9px 18px;
+      box-shadow: 0 2px 12px rgba(43,127,255,0.35);
+      transition: all 0.15s;
+    }
+    .btn-solid:hover { background: #4A9FFF; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(180deg, #EBF2FF 0%, var(--white) 60%);
+      padding: 90px 5vw 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(43,127,255,0.1);
+      color: var(--blue);
+      font-size: 12px; font-weight: 600;
+      padding: 5px 14px; border-radius: 99px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(43,127,255,0.2);
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 68px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      max-width: 780px;
+      margin: 0 auto 20px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+    .hero-ctas { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 60px; }
+    .hero-cta-primary {
+      background: var(--navy);
+      color: white;
+      font-size: 16px; font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 12px;
+      transition: all 0.15s;
+      box-shadow: 0 4px 20px rgba(15,27,45,0.25);
+    }
+    .hero-cta-primary:hover { background: var(--navy-mid); transform: translateY(-2px); }
+    .hero-cta-secondary {
+      background: white;
+      color: var(--text);
+      font-size: 15px; font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      transition: all 0.15s;
+    }
+    .hero-cta-secondary:hover { border-color: var(--blue); color: var(--blue); }
+    .hero-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* DASHBOARD PREVIEW */
+    .dashboard-preview {
+      background: var(--navy);
+      border-radius: 20px;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      box-shadow: 0 30px 80px rgba(15,27,45,0.35);
+    }
+    .preview-bar {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+    }
+    .preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .preview-inner {
+      background: #1A2D45;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .preview-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .preview-stat {
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .ps-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .ps-val { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.03em; }
+    .ps-sub { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px;
+    }
+    .preview-panel {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .pp-title { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .preview-cat-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .preview-cat-row:last-child { margin-bottom: 0; }
+    .pc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .pc-name { font-size: 11px; color: rgba(255,255,255,0.7); flex: 1; }
+    .pc-bar { flex: 2; height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+    .pc-fill { height: 100%; border-radius: 99px; }
+    .pc-amt { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.8); min-width: 60px; text-align: right; }
+    .preview-insight {
+      background: rgba(43,127,255,0.15);
+      border: 1px solid rgba(43,127,255,0.25);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+    }
+    .preview-insight:last-child { margin-bottom: 0; }
+    .pi-title { color: white; font-weight: 600; margin-bottom: 2px; }
+
+    /* SECTION */
+    section { padding: 80px 5vw; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+    .section-h2 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.65;
+      margin-bottom: 48px;
+    }
+
+    /* PROBLEM */
+    .problem-section { background: var(--bg); }
+    .problem-quotes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space, 16px);
+    }
+    .quote-card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .quote-text {
+      font-size: 15px;
+      font-style: italic;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+    .quote-icon { font-size: 28px; margin-bottom: 12px; }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--bg);
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      transition: all 0.15s;
+    }
+    .feature-card:hover { background: white; box-shadow: 0 8px 30px rgba(0,0,0,0.06); transform: translateY(-2px); }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .feature-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.65; }
+
+    /* TRUST */
+    .trust-section { background: var(--navy); color: white; }
+    .trust-section .section-label { color: var(--teal); }
+    .trust-section .section-h2 { color: white; }
+    .trust-section .section-sub { color: rgba(255,255,255,0.5); }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .trust-item {
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .trust-item-icon { font-size: 24px; margin-bottom: 12px; }
+    .trust-item-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .trust-item-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    /* PRICING */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .price-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      transition: all 0.15s;
+    }
+    .price-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+    .price-card.featured {
+      background: var(--navy);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 8px 40px rgba(15,27,45,0.3);
+    }
+    .recommended-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      color: white; font-size: 11px; font-weight: 700;
+      padding: 4px 14px; border-radius: 99px;
+      white-space: nowrap;
+    }
+    .price-plan { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 16px; }
+    .price-card.featured .price-plan { color: rgba(255,255,255,0.5); }
+    .price-amount { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .price-period { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+    .price-card.featured .price-period { color: rgba(255,255,255,0.45); }
+    .price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+    .price-features li { font-size: 13px; padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; color: var(--text-muted); }
+    .price-card.featured .price-features li { color: rgba(255,255,255,0.65); }
+    .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .price-btn {
+      display: block; width: 100%;
+      padding: 12px; border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+      text-align: center; cursor: pointer;
+      border: none; font-family: inherit;
+      transition: all 0.15s;
+    }
+    .price-btn.primary { background: var(--blue); color: white; box-shadow: 0 3px 12px rgba(43,127,255,0.35); }
+    .price-btn.primary:hover { background: #4A9FFF; }
+    .price-btn.outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: white; }
+    .price-btn.outline:hover { background: rgba(255,255,255,0.08); }
+    .price-btn.plain { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .price-btn.plain:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* FOOTER */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 32px 5vw;
+      font-size: 13px;
+    }
+    footer strong { color: rgba(255,255,255,0.8); }
+
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .preview-stats { grid-template-columns: 1fr 1fr; }
+      .preview-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">P</div>
+    <div class="nav-logo-text">Peningur</div>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Eiginleikar</a>
+    <a href="#trust">Öryggi</a>
+    <a href="#pricing">Verð</a>
+  </div>
+  <div class="nav-ctas">
+    <a href="index.html" class="btn-outline">Innskrá</a>
+    <a href="index.html" class="btn-solid">Byrja ókeypis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🇮🇸 Búið til fyrir Íslendinga</div>
+  <h1>Sjáðu <span>hvert peningarnir</span> þínir fara.</h1>
+  <p>Tengdu bankareikninginn þinn, fáðu sjálfkrafa flokkaðar færslur og skýrar mánaðarlegar innsýnar í útgjaldavenjur þínar.</p>
+  <div class="hero-ctas">
+    <a href="index.html" class="hero-cta-primary">Byrja ókeypis →</a>
+    <a href="index.html" class="hero-cta-secondary">Skoða yfirlit</a>
+  </div>
+  <div class="hero-sub">Engin kreditkortsupplýsingar þarf · Hætta má hvenær sem er</div>
+
+  <!-- Dashboard preview -->
+  <div class="dashboard-preview" style="margin-top:48px">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#FF5F57"></div>
+      <div class="preview-dot" style="background:#FFBD2E"></div>
+      <div class="preview-dot" style="background:#28C840"></div>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:20px;margin-left:8px"></div>
+    </div>
+    <div class="preview-inner">
+      <div class="preview-stats">
+        <div class="preview-stat">
+          <div class="ps-label">Útgjöld apríl</div>
+          <div class="ps-val">412.800 kr</div>
+          <div class="ps-sub" style="color:#FCA5A5">▲ 8% frá mars</div>
+        </div>
+        <div class="preview-stat">
+          <div class="ps-label">Laun</div>
+          <div class="ps-val">680.000 kr</div>
+          <div class="ps-sub">Apríl 2025</div>
+        </div>
+        <div class="preview-stat">
+          <div class="ps-label">Sparnaður</div>
+          <div class="ps-val" style="color:#6EE7B7">267.200 kr</div>
+          <div class="ps-sub" style="color:#6EE7B7">39%</div>
+        </div>
+        <div class="preview-stat">
+          <div class="ps-label">Áskriftir</div>
+          <div class="ps-val">47.600 kr</div>
+          <div class="ps-sub">12 virkar</div>
+        </div>
+      </div>
+      <div class="preview-grid">
+        <div class="preview-panel">
+          <div class="pp-title">Útgjöld eftir flokkum</div>
+          ${[
+            ['🏠','Húsnæði','#0EA5B0',35],
+            ['🛒','Matvörur','#10B981',27],
+            ['🍽️','Veitingastaðir','#F59E0B',14],
+            ['⛽','Eldsneyti','#6366F1',8],
+            ['📱','Áskriftir','#8B5CF6',7],
+          ].map(([icon,name,color,pct]) => `
+            <div class="preview-cat-row">
+              <span style="font-size:13px">${icon}</span>
+              <div class="pc-name">${name}</div>
+              <div class="pc-bar"><div class="pc-fill" style="width:${pct*2.5}%;background:${color}"></div></div>
+              <div class="pc-amt">${pct}%</div>
+            </div>`).join('')}
+        </div>
+        <div class="preview-panel">
+          <div class="pp-title">Innsýn</div>
+          <div class="preview-insight">
+            <div class="pi-title">🍽️ Veitingastaðir +31%</div>
+            Hærra en meðaltal síðustu 3 mánaða.
+          </div>
+          <div class="preview-insight" style="background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.2)">
+            <div class="pi-title" style="color:#6EE7B7">💡 Sparnaðarmöguleiki</div>
+            ~18.500 kr/mán ef þú dregur úr veitingastöðum.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem-section" id="problem">
+  <div class="section-label">Vandinn</div>
+  <h2 class="section-h2">Þú veist að peningurinn fer. Þú veist bara ekki hvert.</h2>
+  <p class="section-sub">Flestir vita ílítið um útgjöld sín. Þeir vita að leigin er dýr og matvörur hækkað — en hafa ekkert eitt yfirlit.</p>
+  <div class="problem-quotes">
+    ${[
+      ['😮‍💨', '"Ég kem með góðar tekjur en veit ekki hvert peningurinn fer."'],
+      ['😕', '"Ég vil spara meira en veit ekki hvað ég á að skera niður."'],
+      ['😬', '"Mér líður eins og matvörur og að borða úti eyði öllu."'],
+      ['🤔', '"Ég vil sjá mánaðarleg útgjöld án þess að rekja allt handvirkt."'],
+    ].map(([icon, text]) => `
+      <div class="quote-card">
+        <div class="quote-icon">${icon}</div>
+        <div class="quote-text">${text}</div>
+      </div>`).join('')}
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">Eiginleikar</div>
+  <h2 class="section-h2">Allt sem þú þarft til að skilja útgjöld þín.</h2>
+  <p class="section-sub">Ekki bara tölur. Innsýn sem hjálpar þér að taka betri fjárhagslegar ákvarðanir.</p>
+  <div class="features-grid">
+    ${[
+      ['#EBF2FF','#2B7FFF','📊','Stjórnborð','Fáðu skýrt yfirlit yfir mánuðinn þinn. Heildarútgjöld, tekjur, sparnaður, og stærstu flokkar — í 10 sekúndur.'],
+      ['#ECFDF5','#10B981','🛒','Verslanainnsýn','Sjáðu nákvæmlega hvað þú eyðir hjá Bónus, Krónan, Costco og öðrum Íslenskum verslunum.'],
+      ['#F5F3FF','#8B5CF6','📱','Áskriftargreining','Fáðu lista yfir allar reglubundnar greiðslur. Margir gleyma áskriftum sem þeir nota aldrei.'],
+      ['#FFFBEB','#F59E0B','🎯','Mjúk fjárhagsáætlun','Settu markmið án þess að þú finnir til sektarvísur. Framvindustikur og kærar viðvaranir.'],
+      ['#FEF2F2','#EF4444','📈','Mánaðarskýrsla','Falleg mánaðarleg yfirlit sem útskýrir þróun, bestu árangur og fókussvæði næsta mánaðar.'],
+      ['#E6F8FA','#0EA5B0','🏠','Heimilis-hamur','Deildu fjárhagsyfirliti með maka. Sameiginlegar áætlanir, einkareikningar, sameiginlegar greiðslur.'],
+    ].map(([bg, color, icon, title, desc]) => `
+      <div class="feature-card">
+        <div class="feature-icon" style="background:${bg}">${icon}</div>
+        <div class="feature-title">${title}</div>
+        <div class="feature-desc">${desc}</div>
+      </div>`).join('')}
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-section" id="trust">
+  <div class="section-label">Öryggi & traust</div>
+  <h2 class="section-h2">Bankagögn þín eru geymd með öryggi.</h2>
+  <p class="section-sub">Þú gefur okkur aðgang að færslum þínum — við berum fulla ábyrgð á að vernda þær.</p>
+  <div class="trust-grid">
+    ${[
+      ['🔐','Engin lykilorð geymd','Við geymum aldrei bankaleyniorð þín. Tenging fer fram í gegnum öruggt Open Banking PSD2 ferli.'],
+      ['🏦','Opinber bankasamþætting','Við vinnum eingöngu með opinberar Open Banking tengingar við Íslenska banka — sömu tækni og bankarnir sjálfir nota.'],
+      ['🔒','Dulkóðuð gögn','Allar færslur eru geymdar með AES-256 dulkóðun. Gögn þín eru aldrei seld eða deilt með þriðja aðila.'],
+      ['✋','Þú stjórnar','Þú getur aftengd bankareikninga þína og eytt öllum gögnum hvenær sem er — ein smellur.'],
+      ['🇮🇸','Íslenskur gagnasmiður','Gögn þín eru geymd á Íslandi og falla undir íslenska og evrópska persónuverndarlöggjöf (GDPR).'],
+      ['👁','Engin sölu','Við selja aldrei færslugögn þín til markaðsfyrirtækja, tryggingafyrirtækja eða annarra.'],
+    ].map(([icon, title, desc]) => `
+      <div class="trust-item">
+        <div class="trust-item-icon">${icon}</div>
+        <div class="trust-item-title">${title}</div>
+        <div class="trust-item-desc">${desc}</div>
+      </div>`).join('')}
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--bg)">
+  <div style="text-align:center;margin-bottom:48px">
+    <div class="section-label" style="justify-content:center;display:flex">Verðlag</div>
+    <h2 class="section-h2">Einfalt, gagnsætt verð í krónum.</h2>
+    <p class="section-sub" style="margin:0 auto">Engir duldir kostnaðir. Engar erlendar gjaldmiðlar. Þú getur sagt upp hvenær sem er.</p>
+  </div>
+  <div class="pricing-grid">
+    <!-- Free -->
+    <div class="price-card">
+      <div class="price-plan">Ókeypis</div>
+      <div class="price-amount">0 kr</div>
+      <div class="price-period">að eilífu frítt</div>
+      <ul class="price-features">
+        <li>CSV upphleðsla</li>
+        <li>Grunnyfirlit</li>
+        <li>3 mánaða saga</li>
+        <li>Grunnflokkar</li>
+      </ul>
+      <button class="price-btn plain" onclick="location.href='index.html'">Byrja ókeypis</button>
+    </div>
+
+    <!-- Premium (featured) -->
+    <div class="price-card featured">
+      <div class="recommended-badge">✦ Mælt með</div>
+      <div class="price-plan">Premium</div>
+      <div class="price-amount">1.990 kr</div>
+      <div class="price-period">á mánuði · 19.900 kr/ár</div>
+      <ul class="price-features">
+        <li>Sjálfvirk bankasamþætting</li>
+        <li>Ótakmarkaðir reikningar</li>
+        <li>Öll saga</li>
+        <li>Greinar flokkar</li>
+        <li>Áskriftargreining</li>
+        <li>Fjárhagsáætlunarviðvaranir</li>
+        <li>Mánaðarskýrslur + PDF</li>
+        <li>CSV útflutningur</li>
+      </ul>
+      <button class="price-btn primary" onclick="location.href='index.html'">Byrja 14 daga prufutímabil</button>
+    </div>
+
+    <!-- Household -->
+    <div class="price-card">
+      <div class="price-plan">Heimili</div>
+      <div class="price-amount">3.990 kr</div>
+      <div class="price-period">á mánuði · 39.900 kr/ár</div>
+      <ul class="price-features">
+        <li>Allt í Premium</li>
+        <li>2–5 notendur</li>
+        <li>Sameiginlegt yfirlit</li>
+        <li>Einkareikningar</li>
+        <li>Heimilisskýrslur</li>
+      </ul>
+      <button class="price-btn plain" onclick="location.href='index.html'">Veldu heimili</button>
+    </div>
+
+    <!-- Freelancer -->
+    <div class="price-card">
+      <div class="price-plan">Frjálsræknir</div>
+      <div class="price-amount">5.990 kr</div>
+      <div class="price-period">á mánuði · 59.900 kr/ár</div>
+      <ul class="price-features">
+        <li>Allt í Premium</li>
+        <li>Persónulegt/vinnu flokkun</li>
+        <li>VSK flokkar</li>
+        <li>Kvittunarupphleðsla</li>
+        <li>Útflutningur til endurskoðanda</li>
+        <li>Viðskiptasskýrslur</li>
+      </ul>
+      <button class="price-btn plain" onclick="location.href='index.html'">Veldu frjálsrækning</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section style="background:var(--navy);text-align:center;padding:80px 5vw">
+  <h2 style="font-size:clamp(28px,4vw,44px);font-weight:800;color:white;letter-spacing:-0.03em;margin-bottom:16px">
+    Byrjaðu að skilja útgjöld þín í dag.
+  </h2>
+  <p style="font-size:17px;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto 36px;line-height:1.65">
+    Tengdu bankareikninginn þinn og fáðu skýrt yfirlit yfir útgjöld þín á nokkrum mínútum.
+  </p>
+  <a href="index.html" class="hero-cta-primary">Skoða yfirlit →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Peningur</strong> — Persónulegar fjármálagreiningar fyrir Íslendinga.<br>
+  <span style="margin-top:8px;display:block">© 2025 Peningur ehf. · Öll réttindi áskilin · Reykjavík, Ísland</span>
+</footer>
+
+</body>
+</html>

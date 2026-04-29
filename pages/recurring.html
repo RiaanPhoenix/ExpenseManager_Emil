@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Áskriftir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .rec-header-band {
+      background: linear-gradient(135deg, #1A1040 0%, #2d1f70 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl) var(--space-2xl);
+      color: white;
+      margin-bottom: var(--space-xl);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rec-header-band .main-num {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .rec-header-band .main-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .year-calc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 8px;
+    }
+    .year-calc strong { color: rgba(255,255,255,0.9); }
+
+    .rec-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px var(--space-md);
+      border-radius: var(--radius-md);
+      transition: background 0.12s;
+    }
+    .rec-row:hover { background: var(--bg); }
+    .rec-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .rec-name { font-size: 14px; font-weight: 600; }
+    .rec-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .rec-next { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .rec-amount {
+      text-align: right;
+      margin-left: auto;
+    }
+    .rec-amt-val { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+    .rec-yr-val { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .rec-status {
+      flex-shrink: 0;
+    }
+
+    .review-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--amber-pale);
+      color: var(--amber);
+    }
+    .active-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--green-pale);
+      color: var(--green);
+    }
+
+    .section-divider {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: var(--space-md) var(--space-md) var(--space-xs);
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('recurring', 'Áskriftir & reglubundnar greiðslur', 'Apríl 2025');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+
+  const totalMonthly = d.recurring.reduce((s, r) => s + r.amount, 0);
+  const totalYearly = totalMonthly * 12;
+  const reviewItems = d.recurring.filter(r => r.status === 'review');
+  const activeItems = d.recurring.filter(r => r.status === 'active');
+  const reviewTotal = reviewItems.reduce((s, r) => s + r.amount, 0);
+
+  const catColors = {
+    housing: '#0EA5B0',
+    subscriptions: '#8B5CF6',
+    health: '#EF4444',
+    utilities: '#F59E0B'
+  };
+
+  function renderRow(r) {
+    const color = catColors[r.category] || '#8B5CF6';
+    return `
+    <div class="rec-row">
+      <div class="rec-icon" style="background:${color}18">${r.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="rec-name">${r.name}</div>
+        <div class="rec-meta">${r.freq}</div>
+        <div class="rec-next">Næsta greiðsla: ${r.next}</div>
+      </div>
+      <div class="rec-amount">
+        <div class="rec-amt-val amount">${r.amount.toLocaleString('de-DE')} kr</div>
+        <div class="rec-yr-val">${(r.amount * 12).toLocaleString('de-DE')} kr/ár</div>
+      </div>
+      <div class="rec-status">
+        ${r.status === 'review'
+          ? '<span class="review-badge">⚠ Skoða</span>'
+          : '<span class="active-badge">✓ Virk</span>'}
+      </div>
+    </div>`;
+  }
+
+  root.innerHTML = `
+    <!-- Header band -->
+    <div class="rec-header-band">
+      <div>
+        <div class="main-label">Mánaðarleg áskriftir & reglubundnar greiðslur</div>
+        <div class="main-num">${totalMonthly.toLocaleString('de-DE')} kr</div>
+        <div class="year-calc">
+          Á ársgrundvelli: <strong>${totalYearly.toLocaleString('de-DE')} kr</strong>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:8px">${d.recurring.length} virkar greiðslur</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5)">${Math.round((totalMonthly/d.month.income)*100)}% af tekjum</div>
+      </div>
+    </div>
+
+    <!-- Review alert -->
+    ${reviewItems.length > 0 ? `
+    <div class="insight-card warning" style="margin-bottom:var(--space-lg)">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-body">
+        <div class="insight-title">${reviewItems.length} áskriftir þarfnast skoðunar — ${reviewTotal.toLocaleString('de-DE')} kr/mánuðinn</div>
+        <div class="insight-text">
+          ${reviewItems.map(r => r.name).join(', ')} — þessar áskriftir virðast skarast eða eru sjaldan notaðar.
+          Ef þú segir upp þeim öllum sparar þú <strong>${(reviewTotal*12).toLocaleString('de-DE')} kr á ári</strong>.
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- Review items -->
+    ${reviewItems.length > 0 ? `
+    <div class="card card-pad" style="margin-bottom:var(--space-md);border-color:var(--amber)">
+      <div class="section-divider" style="color:var(--amber)">⚠ Þarf skoðun (${reviewItems.length})</div>
+      ${reviewItems.map(renderRow).join('')}
+    </div>` : ''}
+
+    <!-- Active items -->
+    <div class="card card-pad">
+      <div class="section-divider">Virkar greiðslur (${activeItems.length})</div>
+      ${activeItems.map(renderRow).join('')}
+    </div>
+
+    <!-- Yearly breakdown -->
+    <div class="card card-pad" style="margin-top:var(--space-md)">
+      <div class="card-header">
+        <div class="card-title">Árssamanburður eftir flokkum</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${[
+          { name: '🏠 Húsnæði', amount: 145000, color: '#0EA5B0' },
+          { name: '📱 Áskriftir', amount: 35570, color: '#8B5CF6' },
+          { name: '💪 Heilsa & íþróttir', amount: 9800, color: '#EF4444' }
+        ].map(g => {
+          const pct = Math.round((g.amount / totalMonthly) * 100);
+          return `
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:500">${g.name}</span>
+              <span style="font-size:13px;font-weight:600">${g.amount.toLocaleString('de-DE')} kr/mán · ${(g.amount*12).toLocaleString('de-DE')} kr/ár</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:${pct}%;background:${g.color}"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Verslanir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .merchant-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .merchant-row:hover { background: var(--bg); }
+    .merchant-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .merchant-name { font-size: 14px; font-weight: 600; }
+    .merchant-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .merchant-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .merchant-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .merchant-amount {
+      text-align: right;
+    }
+    .merchant-amt-val { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+    .merchant-change {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .merchant-change.up { color: var(--red); }
+    .merchant-change.down { color: var(--green); }
+    .merchant-change.flat { color: var(--text-muted); }
+
+    .stat-highlight {
+      background: var(--navy);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      color: white;
+      margin-bottom: var(--space-xl);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl);
+    }
+    .stat-highlight .hl-val {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .stat-highlight .hl-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+
+    .grocery-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: var(--space-xl) 0 var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('merchants', 'Verslanir', 'Topp verslanir í apríl 2025');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+
+  const maxAmt = Math.max(...d.merchants.map(m => m.amount));
+
+  const catColors = {
+    groceries: '#10B981',
+    restaurants: '#F59E0B',
+    fuel: '#6366F1',
+    housing: '#0EA5B0',
+    subscriptions: '#8B5CF6',
+    shopping: '#EC4899',
+    health: '#EF4444'
+  };
+  const catNames = {
+    groceries: 'Matvörur',
+    restaurants: 'Veitingastaðir',
+    fuel: 'Eldsneyti',
+    subscriptions: 'Áskriftir',
+    shopping: 'Verslun'
+  };
+
+  // All transactions grouped by merchant (deduplicated)
+  const txByMerchant = {};
+  d.transactions.filter(t => t.amount < 0).forEach(tx => {
+    const key = tx.merchant.split(' ')[0];
+    if (!txByMerchant[key]) txByMerchant[key] = { count: 0, total: 0, icon: tx.icon, category: tx.category };
+    txByMerchant[key].count++;
+    txByMerchant[key].total += Math.abs(tx.amount);
+  });
+  const allMerchants = Object.entries(txByMerchant)
+    .sort((a,b) => b[1].total - a[1].total)
+    .slice(0,12);
+
+  const totalTx = d.transactions.filter(t=>t.amount<0).length;
+  const uniqueMerchants = new Set(d.transactions.map(t=>t.merchant.split(' ')[0])).size;
+  const topThreePct = Math.round((d.merchants.slice(0,3).reduce((s,m)=>s+m.amount,0) / d.month.totalSpent)*100);
+
+  root.innerHTML = `
+    <div class="stat-highlight">
+      <div>
+        <div class="hl-val">${uniqueMerchants}</div>
+        <div class="hl-label">Einstakar verslanir</div>
+      </div>
+      <div>
+        <div class="hl-val">${totalTx}</div>
+        <div class="hl-label">Færslur í mánuðinum</div>
+      </div>
+      <div>
+        <div class="hl-val">${topThreePct}%</div>
+        <div class="hl-label">Topp 3 verslanir af heildarútgjöldum</div>
+      </div>
+    </div>
+
+    <!-- Grocery breakdown spotlight -->
+    <div class="card card-pad" style="margin-bottom:var(--space-md)">
+      <div class="card-header">
+        <div class="card-title">🛒 Matvöruverzlanir — 112.400 kr</div>
+        <span class="badge badge-amber">27% af útgjöldum</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:var(--space-md)">
+        Þú verslaðir í 5 mismunandi matvöruverzlunum í apríl.
+      </div>
+      <div class="grocery-breakdown">
+        ${[
+          { name: 'Bónus', amount: 48200, visits: 8, pct: 43 },
+          { name: 'Krónan', amount: 31400, visits: 6, pct: 28 },
+          { name: 'Costco Iceland', amount: 22500, visits: 2, pct: 20 },
+          { name: 'Hagkaup', amount: 17900, visits: 3, pct: 16 },
+          { name: 'Nettó', amount: 11200, visits: 2, pct: 10 }
+        ].map(g => `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:18px">🛒</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600">${g.name}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${g.visits} heimsóknir</div>
+            </div>
+            <div style="width:120px">
+              <div class="progress-track">
+                <div class="progress-fill green" style="width:${g.pct}%"></div>
+              </div>
+            </div>
+            <div style="text-align:right;min-width:80px">
+              <div style="font-size:13px;font-weight:700">${g.amount.toLocaleString('de-DE')} kr</div>
+              <div style="font-size:10px;color:var(--text-muted)">${g.pct}%</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- All top merchants -->
+    <div class="card card-pad">
+      <div class="card-header">
+        <div class="card-title">Allar topp verslanir</div>
+      </div>
+      ${allMerchants.map(([name, data], i) => {
+        const pct = Math.round((data.total / maxAmt) * 100);
+        const color = catColors[data.category] || '#94A3B8';
+        return `
+        <div class="merchant-row">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:24px;text-align:center;font-size:12px;font-weight:600;color:var(--text-muted)">${i+1}</div>
+            <div class="merchant-icon" style="background:${color}18">${data.icon}</div>
+          </div>
+          <div>
+            <div class="merchant-name">${name}</div>
+            <div class="merchant-meta">${data.count} færslur · ${catNames[data.category] || data.category}</div>
+            <div class="merchant-bar">
+              <div class="merchant-bar-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+          </div>
+          <div class="merchant-amount">
+            <div class="merchant-amt-val amount">${data.total.toLocaleString('de-DE')} kr</div>
+            <div style="font-size:10px;color:var(--text-muted)">${Math.round((data.total/d.month.totalSpent)*100)}% af heildar</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Insight -->
+    <div style="margin-top:var(--space-md)">
+      <div class="insight-card info">
+        <div class="insight-icon">💡</div>
+        <div class="insight-body">
+          <div class="insight-title">Þrjár verslanir — ${topThreePct}% af útgjöldum</div>
+          <div class="insight-text">Bónus, Krónan og Orkan eru stærstu verslanirnar þínar. Ef þú breytir kaupvenjum á þessum stöðum getur það haft mest áhrif á heildarútgjöld þín.</div>
+        </div>
+      </div>
+    </div>
+  `;
+</script>
+</body>
+</html>

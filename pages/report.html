@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Mánaðarskýrsla</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .report-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #0f2d4a 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      color: white;
+      margin-bottom: var(--space-xl);
+      text-align: center;
+    }
+    .report-month {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 8px;
+    }
+    .report-title-text {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-xl);
+    }
+    .report-kpis {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-2xl);
+      flex-wrap: wrap;
+    }
+    .report-kpi { text-align: center; }
+    .report-kpi .kpi-val {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .report-kpi .kpi-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .kpi-sep {
+      width: 1px;
+      background: rgba(255,255,255,0.1);
+      align-self: stretch;
+    }
+
+    .report-section {
+      margin-bottom: var(--space-xl);
+    }
+    .report-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+      padding-left: 4px;
+    }
+
+    .highlight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    .highlight-box {
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+    .highlight-box .hb-icon { font-size: 28px; margin-bottom: 8px; }
+    .highlight-box .hb-val {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .highlight-box .hb-label {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .highlight-box.positive { background: var(--green-pale); }
+    .highlight-box.positive .hb-val { color: var(--green); }
+    .highlight-box.positive .hb-label { color: #065f46; }
+    .highlight-box.neutral { background: var(--blue-pale); }
+    .highlight-box.neutral .hb-val { color: var(--blue); }
+    .highlight-box.neutral .hb-label { color: #1e40af; }
+    .highlight-box.caution { background: var(--amber-pale); }
+    .highlight-box.caution .hb-val { color: var(--amber); }
+    .highlight-box.caution .hb-label { color: #92400e; }
+
+    .narrative-box {
+      background: var(--bg);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: var(--space-lg);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-xl);
+    }
+    .narrative-box strong { color: var(--text-primary); }
+
+    .cat-report-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-report-row:last-child { border-bottom: none; }
+
+    .winner-loser {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+    .wl-card {
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+    .wl-card.winner { background: var(--green-pale); border: 1px solid rgba(16,185,129,0.2); }
+    .wl-card.loser { background: var(--red-pale); border: 1px solid rgba(239,68,68,0.2); }
+    .wl-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .wl-title.winner { color: var(--green); }
+    .wl-title.loser { color: var(--red); }
+    .wl-cat { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .wl-desc { font-size: 12px; color: var(--text-secondary); }
+
+    .export-bar {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-xl);
+      padding: var(--space-xl);
+      background: var(--bg);
+      border-radius: var(--radius-xl);
+    }
+
+    @media (max-width: 700px) {
+      .highlight-grid { grid-template-columns: 1fr; }
+      .winner-loser { grid-template-columns: 1fr; }
+      .report-kpis { gap: var(--space-lg); }
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('report', 'Mánaðarskýrsla', 'Apríl 2025');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+  const m = d.month;
+
+  const netSavings = m.income - m.totalSpent;
+  const savingsRate = Math.round((netSavings / m.income) * 100);
+  const spendingChange = pctChange(m.totalSpent, m.lastMonthSpent);
+
+  // Best and worst category changes
+  const sorted = [...d.categories].map(c => ({
+    ...c,
+    change: pctChange(c.amount, c.lastMonth)
+  })).filter(c => c.id !== 'housing');
+
+  const bestCat = sorted.reduce((a,b) => a.change < b.change ? a : b);
+  const worstCat = sorted.reduce((a,b) => a.change > b.change ? a : b);
+
+  const maxCat = Math.max(...d.categories.map(c => c.amount));
+
+  root.innerHTML = `
+    <!-- Report header -->
+    <div class="report-header">
+      <div class="report-month">Mánaðarskýrsla</div>
+      <div class="report-title-text">Apríl 2025</div>
+      <div class="report-kpis">
+        <div class="report-kpi">
+          <div class="kpi-val">${m.income.toLocaleString('de-DE')} kr</div>
+          <div class="kpi-label">Heildartekjur</div>
+        </div>
+        <div class="kpi-sep"></div>
+        <div class="report-kpi">
+          <div class="kpi-val">${m.totalSpent.toLocaleString('de-DE')} kr</div>
+          <div class="kpi-label">Heildarútgjöld</div>
+        </div>
+        <div class="kpi-sep"></div>
+        <div class="report-kpi">
+          <div class="kpi-val" style="color:#6EE7B7">${netSavings.toLocaleString('de-DE')} kr</div>
+          <div class="kpi-label">Sparnaður</div>
+        </div>
+        <div class="kpi-sep"></div>
+        <div class="report-kpi">
+          <div class="kpi-val" style="color:#6EE7B7">${savingsRate}%</div>
+          <div class="kpi-label">Sparnaðarhlutfall</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary narrative -->
+    <div class="narrative-box">
+      Í apríl eyðirðu <strong>${m.totalSpent.toLocaleString('de-DE')} kr</strong>, sem er
+      <strong>${Math.abs(spendingChange)}% ${spendingChange > 0 ? 'hærra' : 'lægra'} en í mars</strong>.
+      Megin drifkraftar hækkunarinnar voru <strong>veitingastaðir (+31%)</strong> og <strong>matvörur (+14%)</strong>.
+      Þú sparaðir <strong>${netSavings.toLocaleString('de-DE')} kr</strong> (${savingsRate}% af tekjum) — 
+      gott hlutfall miðað við meðaltal Íslendinga.
+    </div>
+
+    <!-- Highlight boxes -->
+    <div class="highlight-grid">
+      <div class="highlight-box positive">
+        <div class="hb-icon">📉</div>
+        <div class="hb-val">−31%</div>
+        <div class="hb-label">Verslun lækkaði mest</div>
+      </div>
+      <div class="highlight-box neutral">
+        <div class="hb-icon">📋</div>
+        <div class="hb-val">12</div>
+        <div class="hb-label">Virkar áskriftir</div>
+      </div>
+      <div class="highlight-box caution">
+        <div class="hb-icon">🍽️</div>
+        <div class="hb-val">+31%</div>
+        <div class="hb-label">Veitingastaðir hækkuðu mest</div>
+      </div>
+    </div>
+
+    <!-- Winner/loser -->
+    <div class="winner-loser" style="margin-bottom:var(--space-xl)">
+      <div class="wl-card winner">
+        <div class="wl-title winner">✓ Besta frammistaða</div>
+        <div class="wl-cat">${bestCat.icon} ${bestCat.name}</div>
+        <div class="wl-desc">Lækkun um ${Math.abs(bestCat.change)}% samanborið við mars — ${Math.abs(bestCat.amount - bestCat.lastMonth).toLocaleString('de-DE')} kr sparnaður.</div>
+      </div>
+      <div class="wl-card loser">
+        <div class="wl-title loser">↑ Hæsta hækkun</div>
+        <div class="wl-cat">${worstCat.icon} ${worstCat.name}</div>
+        <div class="wl-desc">Hækkun um ${worstCat.change}% samanborið við mars — ${Math.abs(worstCat.amount - worstCat.lastMonth).toLocaleString('de-DE')} kr meira en í mars.</div>
+      </div>
+    </div>
+
+    <!-- Full category breakdown -->
+    <div class="report-section">
+      <div class="report-section-title">Útgjöld eftir flokkum</div>
+      <div class="card card-pad">
+        ${d.categories.map(cat => {
+          const change = pctChange(cat.amount, cat.lastMonth);
+          const pct = Math.round((cat.amount / m.totalSpent) * 100);
+          const barPct = Math.round((cat.amount / maxCat) * 100);
+          return `
+          <div class="cat-report-row">
+            <div style="font-size:20px;width:28px;text-align:center">${cat.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:13px;font-weight:600">${cat.name}</span>
+                <span style="font-size:13px;font-weight:700">${cat.amount.toLocaleString('de-DE')} kr</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill blue" style="width:${barPct}%;background:${cat.color}"></div>
+              </div>
+            </div>
+            <div style="text-align:right;min-width:80px;margin-left:12px">
+              <div style="font-size:11px;font-weight:600;color:${change > 0 ? 'var(--red)' : change < 0 ? 'var(--green)' : 'var(--text-muted)'}">
+                ${change > 0 ? '▲' : change < 0 ? '▼' : '–'} ${Math.abs(change)}%
+              </div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${pct}% af heildar</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Next month focus -->
+    <div class="report-section">
+      <div class="report-section-title">Fókus í maí</div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+        <div class="insight-card warning">
+          <div class="insight-icon">🎯</div>
+          <div class="insight-body">
+            <div class="insight-title">Markmið: Veitingastaðir undir 45.000 kr</div>
+            <div class="insight-text">Þú varst 30% yfir áætlun í apríl. Ef þú nærð þessu markmiði sparar þú 13.600 kr miðað við þennan mánuð.</div>
+          </div>
+        </div>
+        <div class="insight-card info">
+          <div class="insight-icon">📱</div>
+          <div class="insight-body">
+            <div class="insight-title">Endurskoða áskriftir</div>
+            <div class="insight-text">PlayStation, Storytel og Myndband.is eru áskriftir sem þarfnast skoðunar. Mögulegur sparnaður: 7.970 kr/mán.</div>
+          </div>
+        </div>
+        <div class="insight-card positive">
+          <div class="insight-icon">💰</div>
+          <div class="insight-body">
+            <div class="insight-title">Haltu áfram með verslun</div>
+            <div class="insight-text">Verslun var 14% undir áætlun í apríl. Haltu þessari þróun áfram í maí.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="export-bar">
+      <button class="btn btn-primary" onclick="alert('PDF útflutningur — kæmi í Premium útgáfu')">
+        ⬇ Sækja PDF skýrslu
+      </button>
+      <button class="btn btn-secondary" onclick="alert('CSV útflutningur — kæmi í Premium útgáfu')">
+        ⬇ Flytja út sem CSV
+      </button>
+    </div>
+  `;
+</script>
+</body>
+</html>

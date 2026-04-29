@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Fjárhagsáætlun</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .budget-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      transition: box-shadow 0.15s;
+    }
+    .budget-card:hover { box-shadow: var(--shadow-md); }
+    .budget-card.over { border-color: var(--red); background: var(--red-pale); }
+    .budget-card.warning { border-color: var(--amber); }
+
+    .budget-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: var(--space-md);
+    }
+    .budget-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .budget-name { font-size: 14px; font-weight: 600; }
+    .budget-spent { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    .budget-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 8px;
+    }
+    .budget-current { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+    .budget-limit { font-size: 13px; color: var(--text-muted); }
+
+    .budget-status {
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .budget-status.over { color: var(--red); font-weight: 600; }
+    .budget-status.warn { color: var(--amber); font-weight: 600; }
+    .budget-status.ok { color: var(--green); font-weight: 500; }
+
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .total-banner {
+      background: var(--navy);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-xl);
+    }
+    .total-banner .ttl { font-size: 38px; font-weight: 800; letter-spacing: -0.04em; }
+    .total-banner .ttl-sub { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+
+    .days-remaining {
+      text-align: center;
+    }
+    .days-num { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
+    .days-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    .budget-tips {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('budgets', 'Fjárhagsáætlun', 'Apríl 2025 · 9 dagar eftir af mánuðinum');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+  const m = d.month;
+
+  const totalBudget = d.categories.reduce((s, c) => s + c.budget, 0);
+  const totalSpent = d.categories.reduce((s, c) => s + c.amount, 0);
+  const overallPct = Math.round((totalSpent / totalBudget) * 100);
+  const overBudgetCats = d.categories.filter(c => c.amount > c.budget);
+  const warningCats = d.categories.filter(c => c.amount <= c.budget && (c.amount/c.budget) >= 0.85);
+
+  function getStatus(cat) {
+    const pct = (cat.amount / cat.budget) * 100;
+    if (pct >= 100) return 'over';
+    if (pct >= 85) return 'warning';
+    return 'ok';
+  }
+
+  function statusMsg(cat) {
+    const pct = Math.round((cat.amount / cat.budget) * 100);
+    const remaining = cat.budget - cat.amount;
+    const daysLeft = m.daysLeft;
+    if (pct >= 100) {
+      return `Yfir áætlun um ${Math.abs(remaining).toLocaleString('de-DE')} kr`;
+    }
+    if (pct >= 85) {
+      return `${pct}% notaðar — ${remaining.toLocaleString('de-DE')} kr eftir í ${daysLeft} daga`;
+    }
+    return `${pct}% notaðar — ${remaining.toLocaleString('de-DE')} kr eftir`;
+  }
+
+  root.innerHTML = `
+    <!-- Total banner -->
+    <div class="total-banner">
+      <div>
+        <div class="ttl-sub">Heildarútgjöld af áætlun</div>
+        <div class="ttl">${totalSpent.toLocaleString('de-DE')} <span style="font-size:24px;opacity:0.4">/ ${totalBudget.toLocaleString('de-DE')} kr</span></div>
+        <div style="margin-top:14px;max-width:400px">
+          <div class="progress-track" style="height:8px">
+            <div class="progress-fill ${overallPct >= 100 ? 'red' : overallPct >= 85 ? 'amber' : 'blue'}" style="width:${Math.min(overallPct,100)}%"></div>
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px">${overallPct}% af heildaráætlun notaðar</div>
+        </div>
+      </div>
+      <div class="days-remaining">
+        <div class="days-num">${m.daysLeft}</div>
+        <div class="days-label">Dagar eftir</div>
+        <div style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.5)">
+          Pr. dag: ${Math.round(totalSpent/m.daysPassed).toLocaleString('de-DE')} kr
+        </div>
+      </div>
+    </div>
+
+    ${overBudgetCats.length > 0 ? `
+    <div class="insight-card warning" style="margin-bottom:var(--space-lg)">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-body">
+        <div class="insight-title">${overBudgetCats.length} flokk${overBudgetCats.length > 1 ? 'ar' : 'ur'} yfir áætlun</div>
+        <div class="insight-text">${overBudgetCats.map(c => c.name).join(' og ')} fara yfir áætlun. Þetta er góður tími til að endurstilla markmið eða skoða útgjöld nánar.</div>
+      </div>
+    </div>` : ''}
+
+    <!-- Budget cards grid -->
+    <div class="budget-grid">
+      ${d.categories.map(cat => {
+        const pct = Math.min(Math.round((cat.amount / cat.budget) * 100), 100);
+        const status = getStatus(cat);
+        const barColor = status === 'over' ? 'red' : status === 'warning' ? 'amber' : 'green';
+        const remaining = cat.budget - cat.amount;
+
+        return `
+        <div class="budget-card ${status}">
+          <div class="budget-top">
+            <div class="budget-icon" style="background:${cat.color}18">${cat.icon}</div>
+            <div>
+              <div class="budget-name">${cat.name}</div>
+              <div class="budget-spent">Áætlun: ${cat.budget.toLocaleString('de-DE')} kr/mán</div>
+            </div>
+          </div>
+
+          <div class="budget-numbers">
+            <div class="budget-current amount">${cat.amount.toLocaleString('de-DE')} kr</div>
+            <div class="budget-limit">${pct}%</div>
+          </div>
+
+          <div class="progress-track" style="height:8px">
+            <div class="progress-fill ${barColor}" style="width:${pct}%"></div>
+          </div>
+
+          <div class="budget-status ${status === 'over' ? 'over' : status === 'warning' ? 'warn' : 'ok'}">
+            ${statusMsg(cat)}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Tips -->
+    <div class="card card-pad">
+      <div class="card-header">
+        <div class="card-title">Ráðleggingar fyrir maí</div>
+      </div>
+      <div class="budget-tips">
+        <div class="insight-card warning">
+          <div class="insight-icon">🍽️</div>
+          <div class="insight-body">
+            <div class="insight-title">Draga úr veitingastöðum</div>
+            <div class="insight-text">Þú ert 30% yfir áætlun á veitingastöðum. Ef þú setur markmið um að fara niður í 45.000 kr næsta mánuð getur þú sparað um 13.600 kr.</div>
+          </div>
+        </div>
+        <div class="insight-card info">
+          <div class="insight-icon">🛒</div>
+          <div class="insight-body">
+            <div class="insight-title">Matvörur aðeins yfir áætlun</div>
+            <div class="insight-text">Matvörur eru 2.400 kr yfir áætlun. Smá hækkun — kann að vera samtengt aukinni verðlagi hjá Bónus og Costco.</div>
+          </div>
+        </div>
+        <div class="insight-card positive">
+          <div class="insight-icon">🛍️</div>
+          <div class="insight-body">
+            <div class="insight-title">Góð frammistaða í verslun</div>
+            <div class="insight-text">Verslun er 14% undir áætlun í apríl samanborið við 31.200 kr í mars. Frábær frammistaða.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+</script>
+</body>
+</html>

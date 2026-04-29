@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Færslur</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .filters-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: var(--space-lg);
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: white;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--blue); }
+
+    .tx-date-group { margin-bottom: var(--space-md); }
+    .tx-date-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      margin-bottom: 2px;
+    }
+    .tx-row-full {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 11px var(--space-md);
+      border-radius: var(--radius-md);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .tx-row-full:hover { background: var(--bg); }
+    .tx-cat-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .summary-row {
+      display: flex;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    .summary-pill {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      text-align: center;
+    }
+    .summary-pill .pill-val {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .summary-pill .pill-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .cat-map {
+      groceries: "Matvörur";
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('transactions', 'Færslur', 'Apríl 2025 · 29 færslur');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+
+  const catNames = {
+    groceries: 'Matvörur',
+    restaurants: 'Veitingastaðir',
+    fuel: 'Eldsneyti',
+    housing: 'Húsnæði',
+    subscriptions: 'Áskriftir',
+    shopping: 'Verslun',
+    health: 'Heilsa',
+    income: 'Tekjur',
+    transport: 'Samgöngur',
+    other: 'Annað'
+  };
+
+  const catColors = {
+    groceries: '#10B981',
+    restaurants: '#F59E0B',
+    fuel: '#6366F1',
+    housing: '#0EA5B0',
+    subscriptions: '#8B5CF6',
+    shopping: '#EC4899',
+    health: '#EF4444',
+    income: '#10B981',
+    other: '#94A3B8'
+  };
+
+  // Group by date
+  const grouped = {};
+  d.transactions.forEach(tx => {
+    if (!grouped[tx.date]) grouped[tx.date] = [];
+    grouped[tx.date].push(tx);
+  });
+
+  const totalSpent = d.transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const totalIncome = d.transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  const txCount = d.transactions.filter(t => t.amount < 0).length;
+
+  root.innerHTML = `
+    <!-- Summary pills -->
+    <div class="summary-row">
+      <div class="summary-pill">
+        <div class="pill-val amount" style="color:var(--text-primary)">${totalSpent.toLocaleString('de-DE')} kr</div>
+        <div class="pill-label">Heildarútgjöld</div>
+      </div>
+      <div class="summary-pill">
+        <div class="pill-val amount" style="color:var(--green)">${totalIncome.toLocaleString('de-DE')} kr</div>
+        <div class="pill-label">Heildartekjur</div>
+      </div>
+      <div class="summary-pill">
+        <div class="pill-val">${txCount}</div>
+        <div class="pill-label">Útgjaldafærslur</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <input type="text" class="search-input" placeholder="🔍  Leita að færslu..." id="txSearch">
+      <button class="filter-chip active" onclick="filterCat(this,'all')">Allar</button>
+      <button class="filter-chip" onclick="filterCat(this,'groceries')">🛒 Matvörur</button>
+      <button class="filter-chip" onclick="filterCat(this,'restaurants')">🍽️ Veitingastaðir</button>
+      <button class="filter-chip" onclick="filterCat(this,'subscriptions')">📱 Áskriftir</button>
+      <button class="filter-chip" onclick="filterCat(this,'fuel')">⛽ Eldsneyti</button>
+      <button class="filter-chip" onclick="filterCat(this,'income')">💰 Tekjur</button>
+    </div>
+
+    <!-- Transaction list -->
+    <div class="card card-pad" id="txContainer">
+      ${Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).map(date => {
+        const txs = grouped[date];
+        const dayTotal = txs.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+        return `
+        <div class="tx-date-group" data-date="${date}">
+          <div class="tx-date-label" style="display:flex;justify-content:space-between">
+            <span>${formatDate(date)}</span>
+            ${dayTotal > 0 ? `<span style="font-weight:500;color:var(--text-secondary)">${dayTotal.toLocaleString('de-DE')} kr</span>` : ''}
+          </div>
+          ${txs.map(tx => {
+            const isIncome = tx.amount > 0;
+            const catName = catNames[tx.category] || tx.category;
+            const catColor = catColors[tx.category] || '#94A3B8';
+            return `
+            <div class="tx-row-full" data-category="${tx.category}">
+              <div class="tx-icon" style="background:${isIncome ? 'var(--green-pale)' : '#f1f5f9'}">${tx.icon}</div>
+              <div class="tx-info">
+                <div class="tx-merchant">${tx.merchant}</div>
+                <div class="tx-meta">${tx.note || catName}</div>
+              </div>
+              <div>
+                <span class="tx-cat-badge" style="background:${catColor}18;color:${catColor}">${catName}</span>
+              </div>
+              <div class="tx-amount ${isIncome ? 'income' : ''}">
+                ${isIncome ? '+' : '−'}${Math.abs(tx.amount).toLocaleString('de-DE')} kr
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+
+  window.filterCat = function(el, cat) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.tx-row-full').forEach(row => {
+      if (cat === 'all' || row.dataset.category === cat) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  };
+
+  document.getElementById('txSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.tx-row-full').forEach(row => {
+      const merchant = row.querySelector('.tx-merchant').textContent.toLowerCase();
+      row.style.display = merchant.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

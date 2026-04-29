@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Yfirlit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl) var(--space-2xl);
+      margin-bottom: var(--space-xl);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+    .welcome-banner .big-number {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .welcome-banner .big-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .welcome-banner .change-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(239,68,68,0.2);
+      color: #FCA5A5;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      margin-top: 8px;
+    }
+    .banner-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .banner-right .income-line {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+    .banner-right .income-amt {
+      font-size: 22px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: -0.02em;
+    }
+    .banner-narrative {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      max-width: 420px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    .cat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .cat-info { flex: 1; min-width: 0; }
+    .cat-name { font-size: 13px; font-weight: 500; }
+    .cat-bar-wrap { margin-top: 4px; }
+    .cat-right { text-align: right; }
+    .cat-amount { font-size: 13px; font-weight: 600; }
+    .cat-change { font-size: 11px; margin-top: 1px; }
+    .cat-change.up { color: var(--red); }
+    .cat-change.down { color: var(--green); }
+    .cat-change.flat { color: var(--text-muted); }
+
+    .insight-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .trend-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .trend-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 100px;
+    }
+    .trend-bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      height: 100%;
+    }
+    .trend-bar-fill {
+      width: 100%;
+      border-radius: 5px 5px 0 0;
+      background: var(--blue-pale);
+      min-height: 4px;
+    }
+    .trend-bar-fill.current { background: var(--blue); }
+    .trend-bar-label { font-size: 10px; color: var(--text-muted); }
+    .trend-bar-amt { font-size: 9px; color: var(--text-muted); }
+
+    .donut-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+    .donut-legend {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-name { flex: 1; color: var(--text-secondary); }
+    .legend-pct { font-weight: 600; color: var(--text-primary); min-width: 30px; text-align: right; }
+
+    @media (max-width: 900px) {
+      .welcome-banner { flex-direction: column; align-items: flex-start; }
+      .banner-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+
+<script src="js/data.js"></script>
+<script src="js/shell.js"></script>
+<script>
+  injectShell('dashboard', 'Yfirlit', 'Apríl 2025');
+
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+  const m = d.month;
+  const maxTrend = Math.max(...d.monthlyTrend.map(x => x.amount));
+
+  root.innerHTML = `
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div>
+        <div class="big-label">Heildarútgjöld — Apríl 2025</div>
+        <div class="big-number">${m.totalSpent.toLocaleString('de-DE').replace(/\./g,'.')} kr</div>
+        <div class="change-pill">▲ ${m.changePercent}% frá mars</div>
+        <div class="banner-narrative">
+          Matvörur og veitingastaðir útskýra meðan hluta hækkunarinnar.
+          Enn eru ${m.daysLeft} dagar eftir af mánuðinum.
+        </div>
+      </div>
+      <div class="banner-right">
+        <div class="income-line">Laun í mánuðinum</div>
+        <div class="income-amt">${m.income.toLocaleString('de-DE').replace(/\./g,'.')} kr</div>
+        <div style="margin-top:16px">
+          <div class="income-line">Sparnaður</div>
+          <div style="font-size:19px;font-weight:700;color:#6EE7B7;letter-spacing:-0.02em">
+            ${m.savings.toLocaleString('de-DE').replace(/\./g,'.')} kr
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px">${m.savingsRate}% af tekjum</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Grid -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Útgjöld í dag</div>
+        <div class="stat-value amount">19.750 kr</div>
+        <div class="stat-sub">
+          <span class="stat-badge up">▲ 2 færslur</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Stærsti flokkur</div>
+        <div class="stat-value" style="font-size:20px">🏠 Húsnæði</div>
+        <div class="stat-sub">145.000 kr · 35% af útgjöldum</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Áskriftir</div>
+        <div class="stat-value amount">47.600 kr</div>
+        <div class="stat-sub">12 virkar áskriftir</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Næsta greiðsla</div>
+        <div class="stat-value" style="font-size:20px">1. maí</div>
+        <div class="stat-sub">Leiga — 145.000 kr</div>
+      </div>
+    </div>
+
+    <!-- Main grid: categories + insight -->
+    <div class="grid-2-1" style="margin-bottom:var(--space-md)">
+      <!-- Left: Categories + trend -->
+      <div style="display:flex;flex-direction:column;gap:var(--space-md)">
+
+        <!-- Category breakdown -->
+        <div class="card card-pad">
+          <div class="card-header">
+            <div class="card-title">Útgjöld eftir flokkum</div>
+            <a href="pages/categories.html" class="card-action">Sjá alla →</a>
+          </div>
+          ${d.categories.slice(0,6).map(cat => {
+            const change = pctChange(cat.amount, cat.lastMonth);
+            const overBudget = cat.amount > cat.budget;
+            const pctUsed = Math.min(Math.round((cat.amount / cat.budget) * 100), 100);
+            const barColor = pctUsed >= 100 ? 'red' : pctUsed >= 85 ? 'amber' : 'green';
+            return `
+            <div class="cat-row">
+              <div class="cat-icon-wrap" style="background:${cat.color}18">${cat.icon}</div>
+              <div class="cat-info">
+                <div class="cat-name">${cat.name}</div>
+                <div class="cat-bar-wrap">
+                  <div class="progress-track" style="margin-top:4px">
+                    <div class="progress-fill ${barColor}" style="width:${pctUsed}%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="cat-right">
+                <div class="cat-amount amount">${cat.amount.toLocaleString('de-DE')} kr</div>
+                <div class="cat-change ${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}">
+                  ${change > 0 ? '▲' : change < 0 ? '▼' : '–'} ${Math.abs(change)}%
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Trend chart -->
+        <div class="card card-pad">
+          <div class="card-header">
+            <div class="card-title">Útgjaldaþróun — 6 mánuðir</div>
+          </div>
+          <div class="trend-chart">
+            ${d.monthlyTrend.map((t, i) => {
+              const h = Math.round((t.amount / maxTrend) * 90);
+              const isCurrent = i === d.monthlyTrend.length - 1;
+              return `<div class="trend-bar-item">
+                <div class="trend-bar-amt">${Math.round(t.amount/1000)}þ</div>
+                <div class="trend-bar-fill ${isCurrent ? 'current' : ''}" style="height:${h}%"></div>
+                <div class="trend-bar-label">${t.month}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Insights + donut + recent -->
+      <div style="display:flex;flex-direction:column;gap:var(--space-md)">
+
+        <!-- Insights -->
+        <div class="card card-pad">
+          <div class="card-header">
+            <div class="card-title">Innsýn</div>
+          </div>
+          <div class="insight-grid">
+            ${d.insights.map(ins => `
+            <div class="insight-card ${ins.type}">
+              <div class="insight-icon">${ins.icon}</div>
+              <div class="insight-body">
+                <div class="insight-title">${ins.title}</div>
+                <div class="insight-text">${ins.text}</div>
+              </div>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Category donut -->
+        <div class="card card-pad">
+          <div class="card-header">
+            <div class="card-title">Hlutfall útgjalda</div>
+          </div>
+          <div class="donut-row">
+            <div class="donut-placeholder"></div>
+            <div class="donut-legend">
+              ${d.categories.slice(0,6).map(c => `
+              <div class="legend-item">
+                <div class="legend-dot" style="background:${c.color}"></div>
+                <div class="legend-name">${c.name}</div>
+                <div class="legend-pct">${c.pct}%</div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card card-pad">
+      <div class="card-header">
+        <div class="card-title">Nýlegar færslur</div>
+        <a href="pages/transactions.html" class="card-action">Sjá allar →</a>
+      </div>
+      <div class="tx-list">
+        ${d.transactions.slice(0,8).map(tx => {
+          const isIncome = tx.amount > 0;
+          return `
+          <div class="tx-row">
+            <div class="tx-icon" style="background:${isIncome ? 'var(--green-pale)' : 'var(--bg)'}">
+              ${tx.icon}
+            </div>
+            <div class="tx-info">
+              <div class="tx-merchant">${tx.merchant}</div>
+              <div class="tx-meta">${formatDate(tx.date)}${tx.note ? ' · ' + tx.note : ''}</div>
+            </div>
+            <div class="tx-amount ${isIncome ? 'income' : ''}">
+              ${isIncome ? '+' : ''}${Math.abs(tx.amount).toLocaleString('de-DE')} kr
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+</script>
+</body>
+</html>

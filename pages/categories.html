@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peningur — Flokkar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .cat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cat-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .cat-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: var(--space-md);
+    }
+    .cat-big-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .cat-card-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cat-card-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .cat-card-amount {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+    .cat-card-budget-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .cat-change-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      margin-top: 6px;
+    }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+
+    .cat-detail-panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+    }
+
+    .mini-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 60px;
+      margin: var(--space-md) 0;
+    }
+    .mini-bar {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      transition: opacity 0.2s;
+    }
+    .mini-bar:hover { opacity: 0.8; }
+    .mini-bar-labels {
+      display: flex;
+      gap: 6px;
+    }
+    .mini-bar-lbl {
+      flex: 1;
+      font-size: 9px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="app-shell" class="app-shell"></div>
+<script src="../js/data.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+  injectShell('categories', 'Flokkar', 'Sundurliðun útgjalda í apríl 2025');
+  const root = document.getElementById('page-root');
+  const d = APP_DATA;
+
+  root.innerHTML = `
+    <div class="cat-grid">
+      ${d.categories.map(cat => {
+        const change = pctChange(cat.amount, cat.lastMonth);
+        const overBudget = cat.amount > cat.budget;
+        const pctUsed = Math.min(Math.round((cat.amount / cat.budget) * 100), 100);
+        const barColor = pctUsed >= 100 ? 'red' : pctUsed >= 85 ? 'amber' : 'green';
+        const changeBg = change > 0 ? 'var(--red-pale)' : change < 0 ? 'var(--green-pale)' : 'var(--bg)';
+        const changeClr = change > 0 ? 'var(--red)' : change < 0 ? 'var(--green)' : 'var(--text-muted)';
+        const changeArrow = change > 0 ? '▲' : change < 0 ? '▼' : '–';
+
+        // Fake 6-month trend for visual
+        const fakeHistory = [0.7, 0.85, 0.95, 0.8, cat.lastMonth/cat.amount, 1];
+        const maxFake = Math.max(...fakeHistory);
+
+        return `
+        <div class="cat-card">
+          <div class="cat-card-top">
+            <div class="cat-big-icon" style="background:${cat.color}18">${cat.icon}</div>
+            <div>
+              <div class="cat-card-name">${cat.name}</div>
+              <div class="cat-card-sub">${cat.pct}% af heildarútgjöldum</div>
+            </div>
+          </div>
+
+          <div class="cat-card-amount amount">${cat.amount.toLocaleString('de-DE')} kr</div>
+
+          <div class="cat-card-budget-row">
+            <span>Áætlun: ${cat.budget.toLocaleString('de-DE')} kr</span>
+            <span style="font-weight:600;color:${overBudget ? 'var(--red)' : 'var(--text-muted)'}">${pctUsed}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill ${barColor}" style="width:${pctUsed}%"></div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="cat-change-badge" style="background:${changeBg};color:${changeClr}">
+              ${changeArrow} ${Math.abs(change)}% frá mars
+            </span>
+            <span style="font-size:11px;color:var(--text-muted)">${cat.lastMonth.toLocaleString('de-DE')} kr í mars</span>
+          </div>
+
+          <!-- Mini trend -->
+          <div class="mini-bar-chart">
+            ${fakeHistory.map((v, i) => {
+              const h = Math.round((v / maxFake) * 55) + 4;
+              const isLast = i === fakeHistory.length - 1;
+              return `<div class="mini-bar" style="height:${h}px;background:${isLast ? cat.color : cat.color + '40'}"></div>`;
+            }).join('')}
+          </div>
+          <div class="mini-bar-labels">
+            ${['N','D','J','F','M','A'].map(l => `<div class="mini-bar-lbl">${l}</div>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Category comparison table -->
+    <div class="card card-pad">
+      <div class="card-header">
+        <div class="card-title">Samanburður við mars</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="font-size:11px;color:var(--text-muted);text-align:left">
+            <th style="padding:8px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Flokkur</th>
+            <th style="padding:8px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;text-align:right">Apríl</th>
+            <th style="padding:8px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;text-align:right">Mars</th>
+            <th style="padding:8px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;text-align:right">Breyting</th>
+            <th style="padding:8px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;text-align:right">Áætlun</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${d.categories.map(cat => {
+            const change = pctChange(cat.amount, cat.lastMonth);
+            const overBudget = cat.amount > cat.budget;
+            return `
+            <tr style="border-top:1px solid var(--border)">
+              <td style="padding:10px 12px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${cat.color}"></div>
+                  <span style="font-size:13px;font-weight:500">${cat.icon} ${cat.name}</span>
+                </div>
+              </td>
+              <td style="padding:10px 12px;text-align:right;font-size:13px;font-weight:600">
+                ${cat.amount.toLocaleString('de-DE')} kr
+              </td>
+              <td style="padding:10px 12px;text-align:right;font-size:13px;color:var(--text-muted)">
+                ${cat.lastMonth.toLocaleString('de-DE')} kr
+              </td>
+              <td style="padding:10px 12px;text-align:right">
+                <span style="font-size:12px;font-weight:600;color:${change > 0 ? 'var(--red)' : change < 0 ? 'var(--green)' : 'var(--text-muted)'}">
+                  ${change > 0 ? '▲' : change < 0 ? '▼' : '–'} ${Math.abs(change)}%
+                </span>
+              </td>
+              <td style="padding:10px 12px;text-align:right">
+                <span style="font-size:12px;font-weight:600;color:${overBudget ? 'var(--red)' : 'var(--green)'}">
+                  ${overBudget ? 'Yfir áætlun' : 'Innan áætlunar'}
+                </span>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+</script>
+</body>
+</html>
