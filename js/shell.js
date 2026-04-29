@@ -4,13 +4,13 @@
 // ===========================
 
 const NAV_ITEMS = [
-  { id: "dashboard",    label: "Yfirlit",        icon: "⬡", href: "../index.html" },
-  { id: "transactions", label: "Færslur",         icon: "↕", href: "transactions.html" },
-  { id: "categories",   label: "Flokkar",         icon: "◈", href: "categories.html" },
-  { id: "merchants",    label: "Verslanir",        icon: "◉", href: "merchants.html" },
-  { id: "recurring",    label: "Áskriftir",        icon: "↺", href: "recurring.html" },
-  { id: "budgets",      label: "Fjárhagsáætlun",   icon: "◎", href: "budgets.html" },
-  { id: "report",       label: "Mánaðarskýrsla",   icon: "▦", href: "report.html" },
+  { id: "dashboard",    label: "Yfirlit",        icon: "⬡", href: "/index.html" },
+  { id: "transactions", label: "Færslur",         icon: "↕", href: "/pages/transactions.html" },
+  { id: "categories",   label: "Flokkar",         icon: "◈", href: "/pages/categories.html" },
+  { id: "merchants",    label: "Verslanir",        icon: "◉", href: "/pages/merchants.html" },
+  { id: "recurring",    label: "Áskriftir",        icon: "↺", href: "/pages/recurring.html" },
+  { id: "budgets",      label: "Fjárhagsáætlun",   icon: "◎", href: "/pages/budgets.html" },
+  { id: "report",       label: "Mánaðarskýrsla",   icon: "▦", href: "/pages/report.html" },
 ];
 
 function buildSidebar(activePage) {
@@ -51,9 +51,14 @@ function buildSidebar(activePage) {
 function buildTopbar(title, subtitle) {
   return `
 <header class="topbar">
-  <div>
-    <div style="font-size:15px;font-weight:600;color:var(--text-primary)">${title}</div>
-    ${subtitle ? `<div style="font-size:12px;color:var(--text-muted)">${subtitle}</div>` : ''}
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="btn btn-ghost btn-sm" id="sidebarToggle" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;padding:6px">
+      &#9776;
+    </button>
+    <div>
+      <div style="font-size:15px;font-weight:600;color:var(--text-primary)">${title}</div>
+      ${subtitle ? `<div style="font-size:12px;color:var(--text-muted)">${subtitle}</div>` : ''}
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <button class="btn btn-secondary btn-sm" onclick="alert('Tenging við banka kæmi hér — Open Banking PSD2')">
@@ -61,7 +66,16 @@ function buildTopbar(title, subtitle) {
     </button>
     <div class="user-avatar" style="width:36px;height:36px;font-size:14px;cursor:pointer">${APP_DATA.user.initials}</div>
   </div>
-</header>`;
+</header>
+<script>
+  (function(){
+    var t = document.getElementById('sidebarToggle');
+    if(window.innerWidth <= 900 && t) t.style.display = 'flex';
+    window.addEventListener('resize', function(){
+      if(t) t.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+    });
+  })();
+<\/script>`;
 }
 
 function injectShell(pageId, title, subtitle) {
